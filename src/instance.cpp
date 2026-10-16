@@ -35,9 +35,13 @@ Instance Instance::get_instance(const std::string& instance_file) {
     while (std::getline(file, line)) {
         if (line.rfind("NAME", 0) == 0) {
             name = get_header(line);
-        } else if (line.rfind("DIMENSION", 0) == 0) {
+        }
+        
+        else if (line.rfind("DIMENSION", 0) == 0) {
             expected_dimension = std::stoi(get_header(line));
-        } else if (line.rfind("NODE_COORD_SECTION") != std::string::npos) {
+        }
+        
+        else if (line.rfind("NODE_COORD_SECTION") != std::string::npos) {
             Node node;
 
             while (file >> node.number >> node.x_coord >> node.y_coord) {
@@ -46,7 +50,9 @@ Instance Instance::get_instance(const std::string& instance_file) {
 
             break;
 
-        } else if (line.find("EOF") != std::string::npos) {
+        }
+        
+        else if (line.find("EOF") != std::string::npos) {
             break;
         }
     }
