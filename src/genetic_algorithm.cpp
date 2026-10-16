@@ -13,21 +13,30 @@ struct Node {
 std::vector<Node> load_instance(const std::string& instance_file) {
     std::vector<Node> nodes;
     std::ifstream file(instance_file);
+
     if (!file.is_open()) {
+        // thought: should insert better error handling
         std::cout << "error: could not open file" << '\n';
         return nodes;
     }
+
     std::string line;
+
     while (std::getline(file, line)) {
         if (line.find("NODE_COORD_SECTION") != std::string::npos) {
             Node node;
             while (file >> node.number >> node.x_coord >> node.y_coord) {
                 nodes.push_back(node);
             }
+            
             break;
         }
-        if (line.find("EOF") != std::string::npos) break;
+
+        if (line.find("EOF") != std::string::npos) {
+            break;
+        }
     }
+
     file.close();
     return nodes;
 }
