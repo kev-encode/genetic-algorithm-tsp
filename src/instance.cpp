@@ -49,7 +49,6 @@ Instance Instance::get_instance(const std::string& instance_file) {
             }
 
             break;
-
         }
         
         else if (line.find("EOF") != std::string::npos) {
