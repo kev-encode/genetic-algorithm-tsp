@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cmath>
 #include <vector>
 #include <string>
 
@@ -10,12 +11,36 @@ struct Node {
     double y_coord;
 };
 
+class Instance {
+public:
+    explicit Instance(std::string& instance_file);
+
+    int get_distance(int node1, int node2) const {
+        return compute_distance(node1, node2);
+    }
+
+    int get_dimension() const {
+        return dimension;
+    }
+
+private:
+    int compute_distance(int node1, int node2) const {
+        double dx = nodes[node1].x_coord - nodes[node2].x_coord;
+        double dy = nodes[node1].y_coord - nodes[node2].y_coord;
+        return static_cast<int>(std::ceil(std::sqrt(dx * dx + dy * dy)));
+    }
+
+    std::string name;
+    std::vector<Node> nodes;
+    int dimension = 0;
+};
+
 std::vector<Node> load_instance(const std::string& instance_file) {
     std::vector<Node> nodes;
     std::ifstream file(instance_file);
 
     if (!file.is_open()) {
-        // thought: should insert better error handling
+        // thought: insert better error handling
         std::cout << "error: could not open file" << '\n';
         return nodes;
     }
