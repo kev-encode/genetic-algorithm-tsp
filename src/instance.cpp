@@ -1,8 +1,36 @@
 #include "instance.h"
 #include <filesystem>
 #include <fstream>
+#include <new>
 #include <stdexcept>
 #include <string>
+
+void Instance::build_distance_matrix() {
+    std::size_t matrix_size = static_cast<std::size_t>(dimension) * dimension;
+
+    if (static_cast<long long>(matrix_size * sizeof(int)) > MAX_MATRIX_BYTES) {
+        return;
+    }
+
+    try {
+        distance_matrix.resize(matrix_size);
+    }
+
+    catch (const std::bad_alloc&) {
+        distance_matrix.clear();
+        return;
+    }
+
+    for (int node1 = 0; node1 < dimension; ++node1) {
+        distance_matrix[static_cast<std::size_t>(node1) * dimension + node1] = 0;
+
+        for (int node2 = node1 + 1; node2 < dimension; ++node2) {
+            int distance = compute_distance(node1, node2);
+            distance_matrix[static_cast<std::size_t>(node1) * dimension + node2] = distance;
+            distance_matrix[static_cast<std::size_t>(node2) * dimension + node1] = distance;
+        }
+    }
+}
 
 std::string Instance::get_header(const std::string& line) {
     std::size_t colon = line.find(':');
@@ -21,8 +49,8 @@ std::string Instance::get_header(const std::string& line) {
     return line.substr(start, end - start + 1);
 }
 
-std::optional<long long> Instance::find_optimal_fitness(const std::string& opt_fits_file, const std::string& instance_name) {
-    std::ifstream file(opt_fits_file);
+std::optional<long long> Instance::find_optimal_fitness(const std::string& optimality_file, const std::string& instance_name) {
+    std::ifstream file(optimality_file);
     std::string line;
 
     while (std::getline(file, line)) {
