@@ -16,6 +16,19 @@ const double CROSSOVER_RATE = 0.85;
 // note: having guaranteed mutation resulted in better, consistent tour diversity
 const double MUTATION_RATE = 1.0;
 
+struct Generation {
+    int number;
+    double time;
+    long long elite_fitness;
+};
+
+// note: returned instead of printed; caller decides where output goes (file write happens after timing stops)
+struct RunResult {
+    long long elite_fitness;
+    std::vector<int> elite_tour;
+    std::vector<Generation> generations;
+};
+
 std::vector<std::vector<int>> create_population(int dimension, std::mt19937& rng);
 long long compute_fitness(const std::vector<int>& tour, const Instance& instance);
 int run_elitism(const std::vector<long long>& fitnesses);
@@ -25,4 +38,4 @@ void run_mutation(std::vector<int>& tour, std::mt19937& rng);
 std::vector<int> make_offspring(const std::vector<std::vector<int>>& population, const std::vector<long long>& fitnesses, std::mt19937& rng);
 void run_two_opt(std::vector<int>& tour, const Instance& instance);
 std::optional<double> compute_percent_error(long long fitness, const Instance& instance);
-long long run_genetic_algorithm(const Instance& instance, std::mt19937& rng);
+RunResult run_genetic_algorithm(const Instance& instance, std::mt19937& rng);

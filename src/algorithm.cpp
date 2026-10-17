@@ -2,8 +2,6 @@
 #include <algorithm>
 #include <chrono>
 #include <deque>
-#include <iomanip>
-#include <iostream>
 #include <numeric>
 #include <utility>
 
@@ -248,27 +246,15 @@ std::optional<double> compute_percent_error(long long fitness, const Instance& i
     return (fitness - *optimal_fitness) * 100.0 / *optimal_fitness;
 }
 
-void print_generation(int generation, double generation_time, long long elite_fitness, const Instance& instance) {
-    std::optional<double> percent_error = compute_percent_error(elite_fitness, instance);
-    std::cout << generation << ", " << std::fixed << std::setprecision(6) << generation_time << ", " << elite_fitness << ", ";
-
-    if (percent_error) {
-        std::cout << std::setprecision(3) << *percent_error;
-    }
-
-    else {
-        std::cout << "n/a";
-    }
-
-    std::cout << '\n';
-}
-
 double get_elapsed_time(std::chrono::steady_clock::time_point start) {
     return std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
 }
 
-long long run_genetic_algorithm(const Instance& instance, std::mt19937& rng) {
+RunResult run_genetic_algorithm(const Instance& instance, std::mt19937& rng) {
     std::chrono::steady_clock::time_point generation_start = std::chrono::steady_clock::now();
+
+    // note: kept in memory, written by caller after run; no file I/O inside timed loop
+    std::vector<Generation> generations;
     std::vector<std::vector<int>> population = create_population(instance.get_dimension(), rng);
     std::vector<long long> fitnesses;
     fitnesses.reserve(POPULATION_SIZE);
@@ -280,7 +266,7 @@ long long run_genetic_algorithm(const Instance& instance, std::mt19937& rng) {
     int elite = run_elitism(fitnesses);
     std::vector<int> elite_tour = population[elite];
     long long elite_fitness = fitnesses[elite];
-    print_generation(0, get_elapsed_time(generation_start), elite_fitness, instance);
+    generations.push_back({0, get_elapsed_time(generation_start), elite_fitness});
     int stagnant_generations = 0;
 
     // note: allocated once, swapped with population each generation; no per-generation rebuild
@@ -328,7 +314,7 @@ long long run_genetic_algorithm(const Instance& instance, std::mt19937& rng) {
 
         run_two_opt(elite_tour, instance);
         elite_fitness = compute_fitness(elite_tour, instance);
-        print_generation(generation, get_elapsed_time(generation_start), elite_fitness, instance);
+        generations.push_back({generation, get_elapsed_time(generation_start), elite_fitness});
 
         // note: empty optional compares false; no known optimum -> stagnation stop only
         if (stagnant_generations >= CONVERGENCE_GENERATIONS || elite_fitness == instance.get_optimal_fitness()) {
@@ -336,5 +322,5 @@ long long run_genetic_algorithm(const Instance& instance, std::mt19937& rng) {
         }
     }
 
-    return elite_fitness;
+    return {elite_fitness, std::move(elite_tour), std::move(generations)};
 }

@@ -47,6 +47,11 @@ public:
         return neighbor_lists[static_cast<std::size_t>(node) * neighbor_count + rank];
     }
 
+    // note: TSPLIB node number from the .tsp file (1-based); tours store 0-based indices
+    int get_node_number(int node) const {
+        return nodes[node].number;
+    }
+
     int get_neighbor_count() const {
         return neighbor_count;
     }

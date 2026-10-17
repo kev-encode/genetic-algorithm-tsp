@@ -1,4 +1,6 @@
 .venv/
+data/*
+stdout/runs/*
 .vscode/*
 !.vscode/tasks.json
 *.exe
