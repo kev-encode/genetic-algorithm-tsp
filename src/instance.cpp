@@ -12,6 +12,7 @@ void Instance::build_distance_matrix() {
         return;
     }
 
+    // note: allocation failure not fatal; empty matrix -> get_distance computes on the fly
     try {
         distance_matrix.resize(matrix_size);
     }
@@ -21,6 +22,7 @@ void Instance::build_distance_matrix() {
         return;
     }
 
+    // note: symmetric distances; compute each pair once and mirror (halves build time)
     for (int node1 = 0; node1 < dimension; ++node1) {
         distance_matrix[static_cast<std::size_t>(node1) * dimension + node1] = 0;
 
@@ -116,6 +118,8 @@ Instance Instance::get_instance(const std::string& instance_file, const std::str
     }
 
     file.close();
+    
+    // note: lookup by filename, not NAME header; linhp318.tsp header says lin318 (wrong optimum)
     std::string instance_name = std::filesystem::path(instance_file).stem().string();
     std::optional<long long> optimal_fitness = find_optimal_fitness(optimality_file, instance_name);
     return Instance(std::move(name), std::move(nodes), optimal_fitness);

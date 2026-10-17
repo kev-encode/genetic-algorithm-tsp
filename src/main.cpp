@@ -9,13 +9,17 @@
 #include <string>
 
 int main(int, char** argv) {
+    // note: timer starts before loading; computation time includes distance matrix build
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+    
+    // note: project root = parent of executable's folder (build/); paths work from any working directory
     std::filesystem::path root_directory = std::filesystem::absolute(argv[0]).parent_path().parent_path();
     std::filesystem::path instance_file = root_directory / "res" / "tsp_instances" / "euc2d" / "a280.tsp";
     std::filesystem::path optimality_file = root_directory / "res" / "optimal_euc2d.txt";
     Instance instance = Instance::get_instance(instance_file.string(), optimality_file.string());
     std::optional<long long> optimal_fitness = instance.get_optimal_fitness();
 
+    // note: filename, not instance.get_name(); some NAME headers differ from filename (linhp318)
     std::cout << "instance: " << instance_file.stem().string() << '\n';
     std::cout << "dimension: " << instance.get_dimension() << '\n';
     std::cout << "optimality: ";

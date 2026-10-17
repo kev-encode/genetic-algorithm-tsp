@@ -17,7 +17,7 @@ int run_elitism(const std::vector<long long>& fitnesses);
 int run_selection(const std::vector<long long>& fitnesses, std::mt19937& rng);
 std::vector<int> run_crossover(const std::vector<int>& parent1, const std::vector<int>& parent2, std::mt19937& rng);
 void run_mutation(std::vector<int>& tour, std::mt19937& rng);
-std::vector<std::vector<int>> make_offspring(const std::vector<std::vector<int>>& population, const std::vector<long long>& fitnesses, std::mt19937& rng);
+std::vector<int> make_offspring(const std::vector<std::vector<int>>& population, const std::vector<long long>& fitnesses, std::mt19937& rng);
 void run_two_opt(std::vector<int>& tour, const Instance& instance);
 std::optional<double> compute_percent_error(long long fitness, const Instance& instance);
 long long run_genetic_algorithm(const Instance& instance, std::mt19937& rng);

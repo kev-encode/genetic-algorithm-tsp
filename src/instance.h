@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+// note: distance matrix memory budget (n * n ints); 1.5 GB fits all EUC_2D instances (d18512 ~1.37 GB)
+// note: instances over budget -> on-the-fly distances
 const long long MAX_MATRIX_BYTES = 1536LL * 1024 * 1024;
 
 struct Node {
@@ -25,6 +27,8 @@ public:
 
     static Instance get_instance(const std::string& instance_file, const std::string& optimality_file);
 
+    // note: matrix lookup several times faster than sqrt; empty matrix (over budget or allocation failed) -> computed on the fly
+    // note: size_t index; node1 * dimension can overflow int on large instances
     int get_distance(int node1, int node2) const {
         if (distance_matrix.empty()) {
             return compute_distance(node1, node2);
@@ -49,6 +53,8 @@ private:
     int compute_distance(int node1, int node2) const {
         double dx = nodes[node1].x_coord - nodes[node2].x_coord;
         double dy = nodes[node1].y_coord - nodes[node2].y_coord;
+
+        // note: TSPLIB nint = (int)(x + 0.5); same result as std::lround for x >= 0, much faster
         return static_cast<int>(std::sqrt(dx * dx + dy * dy) + 0.5);
     }
 
@@ -59,6 +65,10 @@ private:
     std::string name;
     std::vector<Node> nodes;
     int dimension = 0;
+
+    // note: empty if no known optimum
     std::optional<long long> optimal_fitness;
+    
+    // note: flat n * n, row-major; one contiguous block for cache efficiency
     std::vector<int> distance_matrix;
 };
