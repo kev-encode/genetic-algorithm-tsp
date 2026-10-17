@@ -23,7 +23,7 @@ public:
             build_distance_matrix();
           }
 
-    static Instance get_instance(const std::string& instance_file);
+    static Instance get_instance(const std::string& instance_file, const std::string& optimality_file);
 
     int get_distance(int node1, int node2) const {
         if (distance_matrix.empty()) {

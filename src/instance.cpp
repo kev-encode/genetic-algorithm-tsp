@@ -71,7 +71,7 @@ std::optional<long long> Instance::find_optimal_fitness(const std::string& optim
     return std::nullopt;
 }
 
-Instance Instance::get_instance(const std::string& instance_file) {
+Instance Instance::get_instance(const std::string& instance_file, const std::string& optimality_file) {
     std::ifstream file(instance_file);
 
     if (!file.is_open()) {
@@ -116,8 +116,7 @@ Instance Instance::get_instance(const std::string& instance_file) {
     }
 
     file.close();
-    std::filesystem::path instance_path(instance_file);
-    std::string optimality_file = (instance_path.parent_path() / ".optimal_tsp_euc2d.txt").string();
-    std::optional<long long> optimal_fitness = find_optimal_fitness(optimality_file, instance_path.stem().string());
+    std::string instance_name = std::filesystem::path(instance_file).stem().string();
+    std::optional<long long> optimal_fitness = find_optimal_fitness(optimality_file, instance_name);
     return Instance(std::move(name), std::move(nodes), optimal_fitness);
 }
