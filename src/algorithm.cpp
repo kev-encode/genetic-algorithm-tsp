@@ -1,9 +1,11 @@
 #include "algorithm.h"
+#include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <utility>
 
-std::vector<std::vector<int>> create_population(int population_size, int dimension, std::mt19937& rng) {
-    std::vector<std::vector<int>> population(population_size, std::vector<int>(dimension));
+std::vector<std::vector<int>> create_population(int dimension, std::mt19937& rng) {
+    std::vector<std::vector<int>> population(POPULATION_SIZE, std::vector<int>(dimension));
 
     for (std::vector<int>& tour : population) {
         std::iota(tour.begin(), tour.end(), 0);
@@ -29,11 +31,11 @@ int run_elitism(const std::vector<long long>& fitnesses) {
     return static_cast<int>(std::min_element(fitnesses.begin(), fitnesses.end()) - fitnesses.begin());
 }
 
-int run_selection(const std::vector<long long>& fitnesses, int selection_size, std::mt19937& rng) {
+int run_selection(const std::vector<long long>& fitnesses, std::mt19937& rng) {
     std::uniform_int_distribution<int> pick(0, static_cast<int>(fitnesses.size()) - 1);
     int elite = pick(rng);
 
-    for (int i = 1; i < selection_size; ++i) {
+    for (int i = 1; i < SELECTION_SIZE; ++i) {
         int contender = pick(rng);
 
         if (fitnesses[contender] < fitnesses[elite]) {
@@ -44,10 +46,10 @@ int run_selection(const std::vector<long long>& fitnesses, int selection_size, s
     return elite;
 }
 
-std::vector<int> run_crossover(const std::vector<int>& parent1, const std::vector<int>& parent2, double crossover_rate, std::mt19937& rng) {
+std::vector<int> run_crossover(const std::vector<int>& parent1, const std::vector<int>& parent2, std::mt19937& rng) {
     std::uniform_real_distribution<double> chance(0.0, 1.0);
 
-    if (chance(rng) > crossover_rate) {
+    if (chance(rng) > CROSSOVER_RATE) {
         return chance(rng) < 0.5 ? parent2 : parent1;
     }
 
@@ -89,10 +91,10 @@ std::vector<int> run_crossover(const std::vector<int>& parent1, const std::vecto
     return offspring;
 }
 
-void run_mutation(std::vector<int>& tour, double mutation_rate, std::mt19937& rng) {
+void run_mutation(std::vector<int>& tour, std::mt19937& rng) {
     std::uniform_real_distribution<double> chance(0.0, 1.0);
 
-    if (chance(rng) >= mutation_rate) {
+    if (chance(rng) >= MUTATION_RATE) {
         return;
     }
 
@@ -106,4 +108,101 @@ void run_mutation(std::vector<int>& tour, double mutation_rate, std::mt19937& rn
     }
 
     std::swap(tour[position1], tour[position2]);
+}
+
+std::vector<std::vector<int>> make_offspring(const std::vector<std::vector<int>>& population, const std::vector<long long>& fitnesses, std::mt19937& rng) {
+    std::vector<std::vector<int>> offspring;
+    offspring.reserve(POPULATION_SIZE - 1);
+
+    for (int i = 0; i < POPULATION_SIZE - 1; ++i) {
+        int parent1 = run_selection(fitnesses, rng);
+        int parent2 = run_selection(fitnesses, rng);
+
+        while (parent2 == parent1) {
+            parent2 = run_selection(fitnesses, rng);
+        }
+
+        std::vector<int> child = run_crossover(population[parent1], population[parent2], rng);
+        run_mutation(child, rng);
+        offspring.push_back(std::move(child));
+    }
+
+    return offspring;
+}
+
+void run_two_opt(std::vector<int>& tour, const Instance& instance) {
+    int dimension = static_cast<int>(tour.size());
+    bool improved = true;
+
+    while (improved) {
+        improved = false;
+
+        for (int start = 1; start < dimension - 2; ++start) {
+            for (int end = start + 1; end < dimension; ++end) {
+                int before = tour[start - 1];
+                int first = tour[start];
+                int last = tour[end];
+                int after = tour[(end + 1) % dimension];
+                int current_length = instance.get_distance(before, first) + instance.get_distance(last, after);
+                int swapped_length = instance.get_distance(before, last) + instance.get_distance(first, after);
+
+                if (current_length > swapped_length) {
+                    std::reverse(tour.begin() + start, tour.begin() + end + 1);
+                    improved = true;
+                }
+            }
+        }
+    }
+}
+
+long long run_genetic_algorithm(const Instance& instance, std::mt19937& rng) {
+    std::vector<std::vector<int>> population = create_population(instance.get_dimension(), rng);
+    std::vector<long long> fitnesses;
+    fitnesses.reserve(POPULATION_SIZE);
+
+    for (const std::vector<int>& tour : population) {
+        fitnesses.push_back(compute_fitness(tour, instance));
+    }
+
+    int elite = run_elitism(fitnesses);
+    std::vector<int> elite_tour = population[elite];
+    long long elite_fitness = fitnesses[elite];
+    std::cout << "generation 0: " << elite_fitness << '\n';
+    int stagnant_generations = 0;
+
+    for (int generation = 1; generation <= MAX_GENERATIONS; ++generation) {
+        std::vector<std::vector<int>> offspring = make_offspring(population, fitnesses, rng);
+        population.clear();
+        fitnesses.clear();
+        population.push_back(elite_tour);
+        fitnesses.push_back(elite_fitness);
+
+        for (std::vector<int>& child : offspring) {
+            run_two_opt(child, instance);
+            fitnesses.push_back(compute_fitness(child, instance));
+            population.push_back(std::move(child));
+        }
+
+        elite = run_elitism(fitnesses);
+
+        if (fitnesses[elite] < elite_fitness) {
+            elite_tour = population[elite];
+            elite_fitness = fitnesses[elite];
+            stagnant_generations = 0;
+        }
+
+        else {
+            ++stagnant_generations;
+        }
+
+        run_two_opt(elite_tour, instance);
+        elite_fitness = compute_fitness(elite_tour, instance);
+        std::cout << "generation " << generation << ": " << elite_fitness << '\n';
+
+        if (stagnant_generations >= CONVERGENCE_GENERATIONS) {
+            break;
+        }
+    }
+
+    return elite_fitness;
 }
