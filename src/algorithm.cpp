@@ -199,7 +199,7 @@ long long run_genetic_algorithm(const Instance& instance, std::mt19937& rng) {
         elite_fitness = compute_fitness(elite_tour, instance);
         std::cout << "generation " << generation << ": " << elite_fitness << '\n';
 
-        if (stagnant_generations >= CONVERGENCE_GENERATIONS) {
+        if (stagnant_generations >= CONVERGENCE_GENERATIONS || elite_fitness == instance.get_optimal_fitness()) {
             break;
         }
     }

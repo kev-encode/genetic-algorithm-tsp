@@ -1,4 +1,5 @@
 #include "instance.h"
+#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <string>
@@ -18,6 +19,28 @@ std::string Instance::get_header(const std::string& line) {
     }
 
     return line.substr(start, end - start + 1);
+}
+
+std::optional<long long> Instance::find_optimal_fitness(const std::string& opt_fits_file, const std::string& instance_name) {
+    std::ifstream file(opt_fits_file);
+    std::string line;
+
+    while (std::getline(file, line)) {
+        std::size_t colon = line.find(':');
+
+        if (colon == std::string::npos) {
+            continue;
+        }
+
+        std::string key = line.substr(0, colon);
+        key.erase(key.find_last_not_of(" \t") + 1);
+
+        if (key == instance_name) {
+            return std::stoll(get_header(line));
+        }
+    }
+
+    return std::nullopt;
 }
 
 Instance Instance::get_instance(const std::string& instance_file) {
@@ -65,5 +88,8 @@ Instance Instance::get_instance(const std::string& instance_file) {
     }
 
     file.close();
-    return Instance(std::move(name), std::move(nodes));
+    std::filesystem::path instance_path(instance_file);
+    std::string optimality_file = (instance_path.parent_path() / ".optimal_tsp_euc2d.txt").string();
+    std::optional<long long> optimal_fitness = find_optimal_fitness(optimality_file, instance_path.stem().string());
+    return Instance(std::move(name), std::move(nodes), optimal_fitness);
 }

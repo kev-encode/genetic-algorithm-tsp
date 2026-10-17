@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -12,10 +13,11 @@ struct Node {
 
 class Instance {
 public:
-    explicit Instance(std::string name, std::vector<Node> nodes)
+    explicit Instance(std::string name, std::vector<Node> nodes, std::optional<long long> optimal_fitness)
         : name(std::move(name)),
           nodes(std::move(nodes)),
-          dimension(static_cast<int>(this->nodes.size())) {}
+          dimension(static_cast<int>(this->nodes.size())),
+          optimal_fitness(optimal_fitness) {}
 
     static Instance get_instance(const std::string& instance_file);
 
@@ -31,6 +33,10 @@ public:
         return name;
     }
 
+    std::optional<long long> get_optimal_fitness() const {
+        return optimal_fitness;
+    }
+
 private:
     int compute_distance(int node1, int node2) const {
         double dx = nodes[node1].x_coord - nodes[node2].x_coord;
@@ -39,8 +45,10 @@ private:
     }
 
     static std::string get_header(const std::string& line);
+    static std::optional<long long> find_optimal_fitness(const std::string& opt_fits_file, const std::string& instance_name);
 
     std::string name;
     std::vector<Node> nodes;
     int dimension = 0;
+    std::optional<long long> optimal_fitness;
 };
