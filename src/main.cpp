@@ -14,7 +14,7 @@
 // note: filenames without .tsp, from res/instances/euc2d/; run in listed order
 // note: all 78 EUC_2D instances, sorted by dimension; small ones finish first, ~88% of batch time is the last 5
 const std::vector<std::string> INSTANCES_TO_RUN = {
-    "eil51",   "berlin52", "st70",     "eil76",    "pr76",    "rat99",    "kroA100", "kroB100",
+ // "eil51",   "berlin52", "st70",     "eil76",    "pr76",    "rat99",    "kroA100", "kroB100",
  // "kroC100", "kroD100",  "kroE100",  "rd100",    "eil101",  "lin105",   "pr107",   "pr124",
  // "bier127", "ch130",    "pr136",    "pr144",    "ch150",   "kroA150",  "kroB150", "pr152",
  // "u159",    "rat195",   "d198",     "kroA200",  "kroB200", "ts225",    "tsp225",  "pr226",
