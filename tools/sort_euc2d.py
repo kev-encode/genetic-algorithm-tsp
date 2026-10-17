@@ -3,8 +3,8 @@ import shutil
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-TSP_DIR = BASE_DIR / "res" / "instances" / "tsp"
-EUC2D_DIR = BASE_DIR / "res" / "instances" / "tsp" / "euc2d"
+TSP_DIR = BASE_DIR / "res" / "instances" / "other"
+EUC2D_DIR = BASE_DIR / "res" / "instances" / "euc2d"
 
 if __name__ == "__main__":
     for item in TSP_DIR.iterdir():

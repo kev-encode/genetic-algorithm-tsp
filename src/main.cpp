@@ -14,8 +14,8 @@ int main(int, char** argv) {
     
     // note: project root = parent of executable's folder (build/); paths work from any working directory
     std::filesystem::path root_directory = std::filesystem::absolute(argv[0]).parent_path().parent_path();
-    std::filesystem::path instance_file = root_directory / "res" / "tsp_instances" / "euc2d" / "a280.tsp";
-    std::filesystem::path optimality_file = root_directory / "res" / "optimal_euc2d.txt";
+    std::filesystem::path instance_file = root_directory / "res" / "instances" / "euc2d" / "a280.tsp";
+    std::filesystem::path optimality_file = root_directory / "res" / "optimal_values.txt";
     Instance instance = Instance::get_instance(instance_file.string(), optimality_file.string());
     std::optional<long long> optimal_fitness = instance.get_optimal_fitness();
 

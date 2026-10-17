@@ -1,0 +1,85 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "create build directory",
+            "type": "process",
+            "command": "cmd.exe",
+            "args": ["/d", "/c", "if not exist build mkdir build"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": []
+        },
+        {
+            // note: -fopenmp enables parallel offspring generation (#pragma omp in algorithm.cpp)
+            // note: -static bundles libstdc++/libgomp into the .exe; other MinGW DLLs on PATH can't break it
+            "label": "build (debug)",
+            "type": "cppbuild",
+            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-std=c++17",
+                "-Wall",
+                "-Wextra",
+                "-g",
+                "-O0",
+                "-fopenmp",
+                "-static",
+                "${workspaceFolder}\\src\\*.cpp",
+                "-o",
+                "${workspaceFolder}\\build\\main_debug.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "create build directory",
+            "problemMatcher": ["$gcc"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Compile all of src/ with debug symbols and no optimization."
+        },
+        {
+            // note: use for real runs and timing; -O0 debug build several times slower
+            "label": "build (release)",
+            "type": "cppbuild",
+            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-std=c++17",
+                "-Wall",
+                "-Wextra",
+                "-O2",
+                "-fopenmp",
+                "-static",
+                "${workspaceFolder}\\src\\*.cpp",
+                "-o",
+                "${workspaceFolder}\\build\\main.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "create build directory",
+            "problemMatcher": ["$gcc"],
+            "group": "build",
+            "detail": "Compile all of src/ with optimizations, for real runs and timing."
+        },
+        {
+            "label": "run (release)",
+            "type": "process",
+            "command": "${workspaceFolder}\\build\\main.exe",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "build (release)",
+            "problemMatcher": [],
+            "group": "test",
+            "detail": "Build in release mode, then run."
+        }
+    ]
+}
