@@ -9,6 +9,10 @@
 // note: instances over budget -> on-the-fly distances
 const long long MAX_MATRIX_BYTES = 1536LL * 1024 * 1024;
 
+// note: nearest nodes kept per node for 2-opt candidate moves; n * k ints (d18512 ~1.2 MB)
+// note: 16 over 10: lower GA error on every tested instance at similar speed
+const int NEIGHBOR_COUNT = 16;
+
 struct Node {
     int number;
     double x_coord;
@@ -23,6 +27,7 @@ public:
           dimension(static_cast<int>(this->nodes.size())),
           optimal_fitness(optimal_fitness) {
             build_distance_matrix();
+            build_neighbor_lists();
           }
 
     static Instance get_instance(const std::string& instance_file, const std::string& optimality_file);
@@ -35,6 +40,15 @@ public:
         }
 
         return distance_matrix[static_cast<std::size_t>(node1) * dimension + node2];
+    }
+
+    // note: rank 0 = nearest; sorted by distance ascending
+    int get_neighbor(int node, int rank) const {
+        return neighbor_lists[static_cast<std::size_t>(node) * neighbor_count + rank];
+    }
+
+    int get_neighbor_count() const {
+        return neighbor_count;
     }
 
     int get_dimension() const {
@@ -59,6 +73,7 @@ private:
     }
 
     void build_distance_matrix();
+    void build_neighbor_lists();
     static std::string get_header(const std::string& line);
     static std::optional<long long> find_optimal_fitness(const std::string& optimality_file, const std::string& instance_name);
 
@@ -71,4 +86,8 @@ private:
     
     // note: flat n * n, row-major; one contiguous block for cache efficiency
     std::vector<int> distance_matrix;
+
+    // note: min(NEIGHBOR_COUNT, dimension - 1); flat n * neighbor_count, row-major
+    int neighbor_count = 0;
+    std::vector<int> neighbor_lists;
 };

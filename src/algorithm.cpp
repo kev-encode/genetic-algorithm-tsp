@@ -1,6 +1,7 @@
 #include "algorithm.h"
 #include <algorithm>
 #include <chrono>
+#include <deque>
 #include <iomanip>
 #include <iostream>
 #include <numeric>
@@ -129,28 +130,110 @@ std::vector<int> make_offspring(const std::vector<std::vector<int>>& population,
     return offspring;
 }
 
-void run_two_opt(std::vector<int>& tour, const Instance& instance) {
+// note: reverses tour positions from..to (cyclic, inclusive), keeping position in sync
+// note: reverses the complement instead when shorter; same cycle, half the work on average
+void reverse_segment(std::vector<int>& tour, std::vector<int>& position, int from, int to) {
     int dimension = static_cast<int>(tour.size());
-    bool improved = true;
+    int length = (to - from + dimension) % dimension + 1;
 
-    while (improved) {
-        improved = false;
+    if (2 * length > dimension) {
+        int complement_from = (to + 1) % dimension;
+        to = (from - 1 + dimension) % dimension;
+        from = complement_from;
+        length = dimension - length;
+    }
 
-        for (int start = 1; start < dimension - 2; ++start) {
-            for (int end = start + 1; end < dimension; ++end) {
-                int before = tour[start - 1];
-                int first = tour[start];
-                int last = tour[end];
-                int after = tour[(end + 1) % dimension];
-                int current_length = instance.get_distance(before, first) + instance.get_distance(last, after);
-                int swapped_length = instance.get_distance(before, last) + instance.get_distance(first, after);
+    for (int swap = 0; swap < length / 2; ++swap) {
+        int node1 = tour[from];
+        int node2 = tour[to];
+        tour[from] = node2;
+        position[node2] = from;
+        tour[to] = node1;
+        position[node1] = to;
+        from = (from + 1) % dimension;
+        to = (to - 1 + dimension) % dimension;
+    }
+}
 
-                if (current_length > swapped_length) {
-                    std::reverse(tour.begin() + start, tour.begin() + end + 1);
-                    improved = true;
+void activate_node(int node, std::deque<int>& active_nodes, std::vector<bool>& is_active) {
+    if (!is_active[node]) {
+        active_nodes.push_back(node);
+        is_active[node] = true;
+    }
+}
+
+// note: tries one improving 2-opt move involving node; true if a move was applied
+// note: move removes (node, adjacent) + (candidate, candidate_adjacent), adds (node, candidate) + (adjacent, candidate_adjacent)
+bool improve_node(int node, std::vector<int>& tour, std::vector<int>& position, const Instance& instance, std::deque<int>& active_nodes, std::vector<bool>& is_active) {
+    int dimension = static_cast<int>(tour.size());
+
+    // note: direction 0 = successor side, 1 = predecessor side; both needed to find every candidate move
+    for (int direction = 0; direction < 2; ++direction) {
+        int step = direction == 0 ? 1 : dimension - 1;
+        int adjacent = tour[(position[node] + step) % dimension];
+        int adjacent_distance = instance.get_distance(node, adjacent);
+
+        for (int rank = 0; rank < instance.get_neighbor_count(); ++rank) {
+            int candidate = instance.get_neighbor(node, rank);
+            int candidate_distance = instance.get_distance(node, candidate);
+
+            // note: new edge must be shorter than the edge it replaces at node; sorted list -> no later candidate qualifies
+            if (candidate_distance >= adjacent_distance) {
+                break;
+            }
+
+            int candidate_adjacent = tour[(position[candidate] + step) % dimension];
+
+            // note: skip moves sharing an edge (degenerate, no change)
+            if (candidate == adjacent || candidate_adjacent == node) {
+                continue;
+            }
+
+            int gain = adjacent_distance + instance.get_distance(candidate, candidate_adjacent)
+                     - candidate_distance - instance.get_distance(adjacent, candidate_adjacent);
+
+            if (gain > 0) {
+                if (direction == 0) {
+                    reverse_segment(tour, position, position[adjacent], position[candidate]);
                 }
+
+                else {
+                    reverse_segment(tour, position, position[node], position[candidate_adjacent]);
+                }
+
+                // note: edges changed at these 4 nodes; recheck them
+                activate_node(node, active_nodes, is_active);
+                activate_node(adjacent, active_nodes, is_active);
+                activate_node(candidate, active_nodes, is_active);
+                activate_node(candidate_adjacent, active_nodes, is_active);
+                return true;
             }
         }
+    }
+
+    return false;
+}
+
+// note: neighbor-list 2-opt with don't-look bits; ~n * k checks instead of ~n^2 / 2 per pass
+// note: active queue = nodes without don't-look bit; only nodes near changed edges get rechecked
+void run_two_opt(std::vector<int>& tour, const Instance& instance) {
+    int dimension = static_cast<int>(tour.size());
+
+    // note: position[node] = index in tour; O(1) lookup of a candidate's tour neighbors
+    std::vector<int> position(dimension);
+
+    for (int index = 0; index < dimension; ++index) {
+        position[tour[index]] = index;
+    }
+
+    std::deque<int> active_nodes(tour.begin(), tour.end());
+    std::vector<bool> is_active(dimension, true);
+
+    while (!active_nodes.empty()) {
+        int node = active_nodes.front();
+        active_nodes.pop_front();
+        is_active[node] = false;
+        improve_node(node, tour, position, instance, active_nodes, is_active);
     }
 }
 

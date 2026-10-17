@@ -1,4 +1,5 @@
 #include "instance.h"
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <new>
@@ -30,6 +31,36 @@ void Instance::build_distance_matrix() {
             int distance = compute_distance(node1, node2);
             distance_matrix[static_cast<std::size_t>(node1) * dimension + node2] = distance;
             distance_matrix[static_cast<std::size_t>(node2) * dimension + node1] = distance;
+        }
+    }
+}
+
+void Instance::build_neighbor_lists() {
+    neighbor_count = std::min(NEIGHBOR_COUNT, dimension - 1);
+    neighbor_lists.resize(static_cast<std::size_t>(dimension) * neighbor_count);
+
+    // note: rows independent; parallel build (n * n distance reads, ~1 s for d18512 single-threaded)
+    #pragma omp parallel
+    {
+        // note: one buffer per thread, reused across rows
+        std::vector<std::pair<int, int>> candidates(dimension - 1);
+
+        #pragma omp for
+        for (int node1 = 0; node1 < dimension; ++node1) {
+            int count = 0;
+
+            for (int node2 = 0; node2 < dimension; ++node2) {
+                if (node2 != node1) {
+                    candidates[count++] = {get_distance(node1, node2), node2};
+                }
+            }
+
+            // note: (distance, node) pairs; ties broken by node number -> deterministic lists
+            std::partial_sort(candidates.begin(), candidates.begin() + neighbor_count, candidates.end());
+
+            for (int rank = 0; rank < neighbor_count; ++rank) {
+                neighbor_lists[static_cast<std::size_t>(node1) * neighbor_count + rank] = candidates[rank].second;
+            }
         }
     }
 }
