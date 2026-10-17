@@ -4,12 +4,17 @@
 #include <random>
 #include <vector>
 
-const int MAX_GENERATIONS = 1000;
-const int CONVERGENCE_GENERATIONS = 50;
+// note: for d18512, 10000 seems to be a good upper-bound; many runs stop between 6000-8000 generations
+const int MAX_GENERATIONS = 10000;
+
+// note: less than 200 results in premature convergence
+const int CONVERGENCE_GENERATIONS = 200;
 const int POPULATION_SIZE = 200;
 const int SELECTION_SIZE = 7;
 const double CROSSOVER_RATE = 0.85;
-const double MUTATION_RATE = 0.03;
+
+// note: having guaranteed mutation resulted in better, consistent tour diversity
+const double MUTATION_RATE = 1.0;
 
 std::vector<std::vector<int>> create_population(int dimension, std::mt19937& rng);
 long long compute_fitness(const std::vector<int>& tour, const Instance& instance);
