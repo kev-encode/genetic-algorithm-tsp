@@ -4,6 +4,8 @@ from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# note: paths were changed
 TSP_DIR = BASE_DIR / "res" / "instances" / "other"
 EUC2D_DIR = BASE_DIR / "res" / "instances" / "euc2d"
 
