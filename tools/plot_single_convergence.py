@@ -60,15 +60,15 @@ def plot_convergence(run: Run) -> Figure:
 
     error_text: str = (
         "" if run.percent_error is None
-        else f", {run.percent_error:.2f} % error"
+        else f", {run.percent_error:.2f}% Error"
     )
 
     ax.margins(AXIS_MARGIN)
     ax.set_xlabel("Generation")
     ax.set_ylabel("Tour fitness")
     ax.set_title(
-        f"Convergence: {run.instance} run {run.number} "
-        f"({run.dimension} nodes{error_text})"
+        f"{run.instance} Run {run.number} Convergence "
+        f"({run.dimension} Nodes{error_text})"
     )
 
     ax.grid(True, alpha=0.3)
