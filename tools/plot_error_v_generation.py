@@ -5,7 +5,7 @@ from matplotlib.axes import Axes
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import LogNorm
 from matplotlib.figure import Figure
-from load_runs import PLOTS_DIR, Run, load_runs
+from load_runs import AXIS_MARGIN, PLOTS_DIR, Run, load_runs
 
 
 PNG_FILE: Path = PLOTS_DIR / "error_v_generation.png"
@@ -70,7 +70,7 @@ def plot_curves(dimensions: list[int], curves: list[np.ndarray]) -> Figure:
     # note: log x-axis; small instances converge in a few generations, the largest run for thousands
     ax.set_xscale("log")
     ax.set_yscale("symlog", linthresh=SYMLOG_LINEAR_THRESHOLD)
-    ax.set_ylim(bottom=0)
+    ax.margins(AXIS_MARGIN)
     ax.set_xlabel("Generation")
     ax.set_ylabel("Percent error (%)")
     ax.set_title("Percent Error vs. Generation")

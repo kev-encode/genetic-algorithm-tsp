@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from load_runs import PLOTS_DIR, Run, load_runs
+from load_runs import AXIS_MARGIN, PLOTS_DIR, Run, load_runs
 
 
 PNG_FILE: Path = PLOTS_DIR / "error_v_dimension.png"
@@ -38,7 +38,7 @@ def plot_errors(dimensions: list[int], medians: list[float]) -> Figure:
 
     # note: log x-axis; dimensions span 51 to 18512, linear axis would crowd most instances on the left
     ax.set_xscale("log")
-    ax.set_ylim(bottom=0)
+    ax.margins(AXIS_MARGIN)
     ax.set_xlabel("Number of nodes")
     ax.set_ylabel("Percent error (%)")
     ax.set_title("Percent Error vs. Number of Nodes")

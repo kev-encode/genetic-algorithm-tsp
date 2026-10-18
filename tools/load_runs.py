@@ -7,6 +7,9 @@ RUNS_DIR: Path = BASE_DIR / "data" / "runs"
 PLOTS_DIR: Path = BASE_DIR / "stdout" / "plots"
 OPTIMAL_VALUES_FILE: Path = BASE_DIR / "res" / "optimal_values.txt"
 
+# note: padding between the data and the plot box, as a fraction of the data range; shared so every plot matches
+AXIS_MARGIN: float = 0.05
+
 # note: linhp318 has a FIXED_EDGES_SECTION; its optimum is for a constrained variant, not the plain tour the GA solves
 EXCLUDED_INSTANCES: set[str] = {"linhp318"}
 

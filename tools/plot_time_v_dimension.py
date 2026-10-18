@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from load_runs import PLOTS_DIR, Run, load_runs
+from load_runs import AXIS_MARGIN, PLOTS_DIR, Run, load_runs
 
 
 PNG_FILE: Path = PLOTS_DIR / "time_v_dimension.png"
@@ -32,6 +32,7 @@ def plot_times(dimensions: list[int], medians: list[float]) -> Figure:
     # note: log-log axes; times span 0.001 s to over 100 s, and a power law appears as a straight line
     ax.set_xscale("log")
     ax.set_yscale("log")
+    ax.margins(AXIS_MARGIN)
     ax.set_xlabel("Number of nodes")
     ax.set_ylabel("Compute time (seconds)")
     ax.set_title("Compute Time vs. Number of Nodes")

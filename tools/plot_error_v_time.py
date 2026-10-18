@@ -6,7 +6,7 @@ from matplotlib.collections import PathCollection
 from matplotlib.colors import LogNorm
 from matplotlib.figure import Figure
 from matplotlib.legend import Legend
-from load_runs import PLOTS_DIR, Run, load_runs
+from load_runs import AXIS_MARGIN, PLOTS_DIR, Run, load_runs
 
 
 PNG_FILE: Path = PLOTS_DIR / "error_v_time.png"
@@ -45,7 +45,7 @@ def plot_errors_and_times(dimensions: list[int], median_times: list[float], medi
 
     # note: log x-axis; times span 0.001 s to over 100 s
     ax.set_xscale("log")
-    ax.set_ylim(bottom=0)
+    ax.margins(AXIS_MARGIN)
     ax.set_xlabel("Compute time (seconds)")
     ax.set_ylabel("Percent error (%)")
     ax.set_title("Percent Error vs. Compute Time")
