@@ -1,33 +1,38 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from load_runs import PLOTS_DIR, load_runs
+from pathlib import Path
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
+from load_runs import PLOTS_DIR, Run, load_runs
 
 
-PNG_FILE = PLOTS_DIR / "error_v_dimension.png"
-SVG_FILE = PLOTS_DIR / "error_v_dimension.svg"
-PNG_DPI = 300
+PNG_FILE: Path = PLOTS_DIR / "error_v_dimension.png"
+SVG_FILE: Path = PLOTS_DIR / "error_v_dimension.svg"
+PNG_DPI: int = 300
 
 
 # note: instances without a known optimum have no percent error; skipped
 # note: median instead of mean; one or two bad runs (fl3795) don't drag the summary
 # note: spread between runs is left to plot_variability_v_dimension.py
-def collect_errors(runs_by_instance):
-    dimensions = []
-    medians = []
+def collect_errors(runs_by_instance: dict[str, list[Run]]) -> tuple[list[int], list[float]]:
+    dimensions: list[int] = []
+    medians: list[float] = []
 
     for runs in runs_by_instance.values():
-        errors = [run.percent_error for run in runs if run.percent_error is not None]
+        errors: list[float] = [run.percent_error for run in runs if run.percent_error is not None]
 
         if not errors:
             continue
 
         dimensions.append(runs[0].dimension)
-        medians.append(np.median(errors))
+        medians.append(float(np.median(errors)))
 
     return dimensions, medians
 
 
-def plot_errors(dimensions, medians):
+def plot_errors(dimensions: list[int], medians: list[float]) -> Figure:
+    fig: Figure
+    ax: Axes
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.scatter(dimensions, medians, s=20, color="tab:blue", label="Median of 10 runs")
 
@@ -43,7 +48,7 @@ def plot_errors(dimensions, medians):
     return fig
 
 
-def save_plot(fig):
+def save_plot(fig: Figure) -> None:
     PLOTS_DIR.mkdir(parents=True, exist_ok=True)
     fig.savefig(PNG_FILE, dpi=PNG_DPI)
     fig.savefig(SVG_FILE)

@@ -2,13 +2,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-RUNS_DIR = BASE_DIR / "data" / "runs"
-PLOTS_DIR = BASE_DIR / "stdout" / "plots"
-OPTIMAL_VALUES_FILE = BASE_DIR / "res" / "optimal_values.txt"
+BASE_DIR: Path = Path(__file__).resolve().parent.parent
+RUNS_DIR: Path = BASE_DIR / "data" / "runs"
+PLOTS_DIR: Path = BASE_DIR / "stdout" / "plots"
+OPTIMAL_VALUES_FILE: Path = BASE_DIR / "res" / "optimal_values.txt"
 
 # note: linhp318 has a FIXED_EDGES_SECTION; its optimum is for a constrained variant, not the plain tour the GA solves
-EXCLUDED_INSTANCES = {"linhp318"}
+EXCLUDED_INSTANCES: set[str] = {"linhp318"}
 
 
 @dataclass
@@ -32,13 +32,13 @@ class Run:
     tour: list[int] = field(default_factory=list)
 
 
-def compute_percent_error(fitness, optimal):
+def compute_percent_error(fitness: int, optimal: int | None) -> float | None:
     return None if optimal is None else (fitness - optimal) * 100.0 / optimal
 
 
 # note: {instance name: optimal tour length}; lines formatted "name : value"
-def load_optimal_values(optimal_values_file=OPTIMAL_VALUES_FILE):
-    optimal_values = {}
+def load_optimal_values(optimal_values_file: Path = OPTIMAL_VALUES_FILE) -> dict[str, int]:
+    optimal_values: dict[str, int] = {}
 
     for line in optimal_values_file.read_text().splitlines():
         if line.strip():
@@ -50,11 +50,11 @@ def load_optimal_values(optimal_values_file=OPTIMAL_VALUES_FILE):
 
 # note: file layout from write_run in src/main.cpp; header, then "generations:" and "tour:" sections
 # note: optimum and percent errors recomputed from optimal_values; values stored in the file may predate a correction
-def load_run(run_file, optimal_values):
-    header = {}
-    generations = []
-    tour = []
-    section = "header"
+def load_run(run_file: Path, optimal_values: dict[str, int]) -> Run:
+    header: dict[str, str] = {}
+    generations: list[Generation] = []
+    tour: list[int] = []
+    section: str = "header"
 
     for line in run_file.read_text().splitlines():
         line = line.strip()
@@ -76,8 +76,8 @@ def load_run(run_file, optimal_values):
         else:
             tour.append(int(line))
 
-    optimal = optimal_values.get(header["instance"])
-    elite = int(header["elite"])
+    optimal: int | None = optimal_values.get(header["instance"])
+    elite: int = int(header["elite"])
 
     for generation in generations:
         generation.percent_error = compute_percent_error(generation.elite_fitness, optimal)
@@ -96,13 +96,13 @@ def load_run(run_file, optimal_values):
 
 
 # note: {instance name: [runs sorted by run number]}, instances sorted by dimension
-def load_runs(runs_dir=RUNS_DIR):
-    optimal_values = load_optimal_values()
-    runs = {}
+def load_runs(runs_dir: Path = RUNS_DIR) -> dict[str, list[Run]]:
+    optimal_values: dict[str, int] = load_optimal_values()
+    runs: dict[str, list[Run]] = {}
 
     for instance_dir in runs_dir.iterdir():
         if instance_dir.is_dir() and instance_dir.name not in EXCLUDED_INSTANCES:
-            instance_runs = [load_run(run_file, optimal_values) for run_file in instance_dir.glob("run*.txt")]
+            instance_runs: list[Run] = [load_run(run_file, optimal_values) for run_file in instance_dir.glob("run*.txt")]
 
             if instance_runs:
                 runs[instance_dir.name] = sorted(instance_runs, key=lambda run: run.number)
