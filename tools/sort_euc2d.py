@@ -1,6 +1,7 @@
-import tsplib95
 import shutil
 from pathlib import Path
+
+import tsplib95
 
 
 BASE_DIR: Path = Path(__file__).resolve().parent.parent

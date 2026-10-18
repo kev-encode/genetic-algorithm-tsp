@@ -7,10 +7,12 @@ RUNS_DIR: Path = BASE_DIR / "data" / "runs"
 PLOTS_DIR: Path = BASE_DIR / "stdout" / "plots"
 OPTIMAL_VALUES_FILE: Path = BASE_DIR / "res" / "optimal_values.txt"
 
-# note: padding between the data and the plot box, as a fraction of the data range; shared so every plot matches
+# note: padding between the data and the plot box, as a fraction of the data
+# range; shared so every plot matches
 AXIS_MARGIN: float = 0.05
 
-# note: linhp318 has a FIXED_EDGES_SECTION; its optimum is for a constrained variant, not the plain tour the GA solves
+# note: linhp318 has a FIXED_EDGES_SECTION; its optimum is for a constrained
+# variant, not the plain tour the GA solves
 EXCLUDED_INSTANCES: set[str] = {"linhp318"}
 
 
@@ -40,7 +42,9 @@ def compute_percent_error(fitness: int, optimal: int | None) -> float | None:
 
 
 # note: {instance name: optimal tour length}; lines formatted "name : value"
-def load_optimal_values(optimal_values_file: Path = OPTIMAL_VALUES_FILE) -> dict[str, int]:
+def load_optimal_values(
+    optimal_values_file: Path = OPTIMAL_VALUES_FILE,
+) -> dict[str, int]:
     optimal_values: dict[str, int] = {}
 
     for line in optimal_values_file.read_text().splitlines():
@@ -51,8 +55,10 @@ def load_optimal_values(optimal_values_file: Path = OPTIMAL_VALUES_FILE) -> dict
     return optimal_values
 
 
-# note: file layout from write_run in src/main.cpp; header, then "generations:" and "tour:" sections
-# note: optimum and percent errors recomputed from optimal_values; values stored in the file may predate a correction
+# note: file layout from write_run in src/main.cpp; header, then
+# "generations:" and "tour:" sections
+# note: optimum and percent errors recomputed from optimal_values; values
+# stored in the file may predate a correction
 def load_run(run_file: Path, optimal_values: dict[str, int]) -> Run:
     header: dict[str, str] = {}
     generations: list[Generation] = []
@@ -74,20 +80,31 @@ def load_run(run_file: Path, optimal_values: dict[str, int]) -> Run:
 
         elif section == "generations":
             number, time, elite_fitness, _ = line.split(", ")
-            generations.append(Generation(int(number), float(time), int(elite_fitness), None))
+            generations.append(
+                Generation(int(number), float(time), int(elite_fitness), None)
+            )
 
         else:
             tour.append(int(line))
 
-    # note: generation 0 is the random initial population, not GA output; dropped here, and its time removed from compute time
-    initial_time: float = sum(generation.time for generation in generations if generation.number == 0)
-    generations = [generation for generation in generations if generation.number != 0]
+    # note: generation 0 is the random initial population, not GA output;
+    # dropped here, and its time removed from compute time
+    initial_time: float = sum(
+        generation.time for generation in generations
+        if generation.number == 0
+    )
+
+    generations = [
+        generation for generation in generations if generation.number != 0
+    ]
 
     optimal: int | None = optimal_values.get(header["instance"])
     elite: int = int(header["elite"])
 
     for generation in generations:
-        generation.percent_error = compute_percent_error(generation.elite_fitness, optimal)
+        generation.percent_error = compute_percent_error(
+            generation.elite_fitness, optimal
+        )
 
     return Run(
         instance=header["instance"],
@@ -102,16 +119,25 @@ def load_run(run_file: Path, optimal_values: dict[str, int]) -> Run:
     )
 
 
-# note: {instance name: [runs sorted by run number]}, instances sorted by dimension
+# note: {instance name: [runs sorted by run number]}, instances sorted by
+# dimension
 def load_runs(runs_dir: Path = RUNS_DIR) -> dict[str, list[Run]]:
     optimal_values: dict[str, int] = load_optimal_values()
     runs: dict[str, list[Run]] = {}
 
     for instance_dir in runs_dir.iterdir():
-        if instance_dir.is_dir() and instance_dir.name not in EXCLUDED_INSTANCES:
-            instance_runs: list[Run] = [load_run(run_file, optimal_values) for run_file in instance_dir.glob("run*.txt")]
+        if (
+            instance_dir.is_dir()
+            and instance_dir.name not in EXCLUDED_INSTANCES
+        ):
+            instance_runs: list[Run] = [
+                load_run(run_file, optimal_values)
+                for run_file in instance_dir.glob("run*.txt")
+            ]
 
             if instance_runs:
-                runs[instance_dir.name] = sorted(instance_runs, key=lambda run: run.number)
+                runs[instance_dir.name] = sorted(
+                    instance_runs, key=lambda run: run.number
+                )
 
     return dict(sorted(runs.items(), key=lambda item: item[1][0].dimension))

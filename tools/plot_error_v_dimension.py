@@ -1,8 +1,10 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+
 from load_runs import AXIS_MARGIN, PLOTS_DIR, Run, load_runs
 
 
@@ -12,14 +14,19 @@ PNG_DPI: int = 300
 
 
 # note: instances without a known optimum have no percent error; skipped
-# note: median instead of mean; one or two bad runs (fl3795) don't drag the summary
+# note: median instead of mean; one or two bad runs (fl3795) don't drag the
+# summary
 # note: spread between runs is left to plot_variability_v_dimension.py
-def collect_errors(runs_by_instance: dict[str, list[Run]]) -> tuple[list[int], list[float]]:
+def collect_errors(
+    runs_by_instance: dict[str, list[Run]],
+) -> tuple[list[int], list[float]]:
     dimensions: list[int] = []
     medians: list[float] = []
 
     for runs in runs_by_instance.values():
-        errors: list[float] = [run.percent_error for run in runs if run.percent_error is not None]
+        errors: list[float] = [
+            run.percent_error for run in runs if run.percent_error is not None
+        ]
 
         if not errors:
             continue
@@ -34,9 +41,13 @@ def plot_errors(dimensions: list[int], medians: list[float]) -> Figure:
     fig: Figure
     ax: Axes
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.scatter(dimensions, medians, s=20, color="tab:blue", label="Median of 10 runs")
+    ax.scatter(
+        dimensions, medians, s=20, color="tab:blue",
+        label="Median of 10 runs",
+    )
 
-    # note: log x-axis; dimensions span 51 to 18512, linear axis would crowd most instances on the left
+    # note: log x-axis; dimensions span 51 to 18512, linear axis would crowd
+    # most instances on the left
     ax.set_xscale("log")
     ax.margins(AXIS_MARGIN)
     ax.set_xlabel("Number of nodes")
