@@ -76,6 +76,10 @@ def load_run(run_file: Path, optimal_values: dict[str, int]) -> Run:
         else:
             tour.append(int(line))
 
+    # note: generation 0 is the random initial population, not GA output; dropped here, and its time removed from compute time
+    initial_time: float = sum(generation.time for generation in generations if generation.number == 0)
+    generations = [generation for generation in generations if generation.number != 0]
+
     optimal: int | None = optimal_values.get(header["instance"])
     elite: int = int(header["elite"])
 
@@ -88,7 +92,7 @@ def load_run(run_file: Path, optimal_values: dict[str, int]) -> Run:
         dimension=int(header["dimension"]),
         optimal=optimal,
         elite=elite,
-        compute_time=float(header["compute time"]),
+        compute_time=float(header["compute time"]) - initial_time,
         percent_error=compute_percent_error(elite, optimal),
         generations=generations,
         tour=tour,

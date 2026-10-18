@@ -1,7 +1,9 @@
 .venv/
-data/*
-stdout/runs/*
-stdout/plots/*
+tools/__pycache__/
 .vscode/*
 !.vscode/tasks.json
 *.exe
+
+data/*
+stdout/runs/*
+stdout/plots/*
