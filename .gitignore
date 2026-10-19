@@ -4,6 +4,5 @@ tools/__pycache__/
 !.vscode/tasks.json
 *.exe
 
-data/*
 stdout/runs/*
 stdout/plots/*
