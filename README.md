@@ -6,7 +6,7 @@ A genetic algorithm for the traveling salesman problem.
 | --- | --- |
 | ![Unsolved Instance](docs/single_tour_kroA100_run1_nodes.png) | ![enetic Algorithm's Path](docs/single_tour_kroA100_run1_elite.png) |
 
-| Optimal Path | Percent Error Per Generation |
+| Optimal Path | Percent Error per Generation |
 | --- | --- |
 | ![Optimal Path](docs/single_tour_kroA100_run1_optimal.png) | ![Percent Error Per Generation](docs/single_convergence_kroA100_run1.png) |
 
@@ -50,39 +50,39 @@ A genetic algorithm for the traveling salesman problem.
 
 2. List traveling salesman problem instance(s) in `INSTANCES_TO_RUN`
 
-[Line 16 of `src/main.cpp`](src/main.cpp#L16)
+    [Line 16 of `src/main.cpp`](src/main.cpp#L16)
 
-```cpp
-const std::vector<std::string> INSTANCES_TO_RUN = {
-      "kroA100", "pcb442",
-};
-```
+    ```cpp
+    const std::vector<std::string> INSTANCES_TO_RUN = {
+        "kroA100", "pcb442",
+    };
+    ```
 
 <br>
 
 3. Set the number of runs per instance in `RUNS_PER_INSTANCE` (default 10)
 
-[Line 29 of `src/main.cpp`](src/main.cpp#L29)
+    [Line 29 of `src/main.cpp`](src/main.cpp#L29)
 
-```cpp
-const int RUNS_PER_INSTANCE = 10;
-```
+    ```cpp
+    const int RUNS_PER_INSTANCE = 10;
+    ```
 
 <br>
 
 4. Build in release mode; in VS Code, go to `Terminal` > `Run Task...` > `build (release)`, or from terminal in project root
 
-```powershell
-C:\msys64\ucrt64\bin\g++.exe -std=c++17 -O2 -fopenmp -static src\main.cpp src\algorithm.cpp src\instance.cpp -o build\main.exe
-```
+    ```powershell
+    C:\msys64\ucrt64\bin\g++.exe -std=c++17 -O2 -fopenmp -static src\main.cpp src\algorithm.cpp src\instance.cpp -o build\main.exe
+    ```
 
 <br>
 
 5. Run; in VS Code, go to `Terminal` > `Run Task...` > `run (release)`, or from terminal in project root
 
-```powershell
-.\build\main.exe
-```
+    ```powershell
+    .\build\main.exe
+    ```
 
 <br>
 
