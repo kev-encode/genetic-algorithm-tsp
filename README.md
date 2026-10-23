@@ -91,3 +91,43 @@ A genetic algorithm for the traveling salesman problem.
 <br>
 
 ## Running the Helper Tools
+
+1. Create and activate a virtual environment; from terminal in project root
+
+    ```powershell
+    python -m venv .venv
+    .\.venv\Scripts\Activate.ps1
+    ```
+
+<br>
+
+2. Install the dependencies listed in `requirements.txt`
+
+    ```powershell
+    pip install -r requirements.txt
+    ```
+
+<br>
+
+3. Verify the input data the tool reads; paths are built from the project root ([line 5 of `tools/load_runs.py`](tools/load_runs.py#L5)), so the tools can be run from any directory (a run file argument is still relative to the current directory)
+    * Plotting tools read run files from `data/runs/<instance>/run<N>.txt`; copy the results from `stdout/runs/` into `data/runs/` to plot new runs
+    * Instance and optimal tour plots also read `res/instances/euc2d/<instance>.tsp` and `res/optimal_tours/<instance>.opt.tour`
+    * Percent errors are computed from `res/optimal_values.txt`
+
+<br>
+
+4. Run a tool by its script name in `tools/`
+
+    ```powershell
+    python tools\<script>.py
+    ```
+
+    Single-run tools (`plot_single_convergence.py`, `plot_single_tour.py`) take the path to one run file as an argument; pass `-h` to see a tool's arguments
+
+    ```powershell
+    python tools\<script>.py data\runs\<instance>\run<N>.txt
+    ```
+
+<br>
+
+5. Find the plots as `.png` and `.svg` in `stdout/plots/`
