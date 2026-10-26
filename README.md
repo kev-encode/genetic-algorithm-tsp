@@ -15,12 +15,11 @@ A genetic algorithm for the traveling salesman problem.
 ## Features
 
 * Hybrid genetic algorithm
-    * Features
-        * 7-tour tournament selection
-        * Order crossover
-        * 2-node swap mutation
-        * 2-opt local search with 16-nearest-neighbor lists
-        * Elitism
+    * 7-tour tournament selection
+    * Order crossover
+    * 2-node swap mutation
+    * 2-opt local search with 16-nearest-neighbor lists
+    * Elitism
 * Helper tools
     * Sort `EUC_2D` instances from TSPLIB95
     * Plot aggregate percent error vs. node count
