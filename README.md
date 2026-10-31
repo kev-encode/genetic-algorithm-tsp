@@ -135,4 +135,4 @@ A genetic algorithm for the traveling salesman problem.
 
 ## Rationale and Results
 
-The rationale and results for this project are located in [docs/rationale_and_results.md](docs/rationale_and_results.md)
+The rationale and results for this project are located in [`docs/rationale_and_results.md`](docs/rationale_and_results.md).
