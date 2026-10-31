@@ -130,3 +130,9 @@ A genetic algorithm for the traveling salesman problem.
 <br>
 
 5. Find the plots as `.png` and `.svg` in `stdout/plots/`
+
+<br>
+
+## Rationale and Results
+
+The rationale and results for this project are located in [docs/rationale_and_results.md](docs/rationale_and_results.md)
